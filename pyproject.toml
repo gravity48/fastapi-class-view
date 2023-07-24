@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fastapi_class_view"
+version = "0.0.1"
+authors = [
+    { name = "gravity48", email = "gravity4849@gmail.com" },
+]
+description = "Class based view for FastAPI"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'fastapi >=0.98.0',
+]
+
+[project.urls]
+"Homepage" = "https://github.com/gravity48/fastapi_class_view"
+"Bug Tracker" = "https://github.com/gravity48/fastapi_class_view/issues"
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+)/
+'''
