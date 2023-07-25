@@ -5,6 +5,7 @@ httpx
 
 aiosqlite
 
+twine
 pytest
 pytest-asyncio
 black

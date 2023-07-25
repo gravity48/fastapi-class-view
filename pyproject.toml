@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fastapi_class_view"
+name = "fastapi_simple_class_view"
 version = "0.0.1"
 authors = [
     { name = "gravity48", email = "gravity4849@gmail.com" },
