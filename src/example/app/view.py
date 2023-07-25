@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-from fastapi_class_view.base import APIView
-from fastapi_class_view.mixins import GenericView
+from fastapi_simple_class_view.base import APIView
+from fastapi_simple_class_view.mixins import GenericView
 
 from .permissions import is_customer, is_superuser
 from .scheme import UserCreateUpdate, UserSchema

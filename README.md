@@ -37,8 +37,8 @@ It includes:
 * slug_field_type - Type (the type of slug field, used for the correct operation of the swagger)
 
 ```python
-from fastapi_class_view.base import APIView
-from fastapi_class_view.mixins import GenericView
+from fastapi_simple_class_view.base import APIView
+from fastapi_simple_class_view.mixins import GenericView
 from collections import defaultdict
 
 from .permissions import is_superuser, is_customer
@@ -62,7 +62,7 @@ class UsersView(GenericView, APIView):
 
 ```python
 from example.app.view import UsersView
-from fastapi_class_view.controller import APIController
+from fastapi_simple_class_view.controller import APIController
 
 app_router = APIController()
 
@@ -75,7 +75,7 @@ Service that uses the sqlalchemy model
 
 ```python
 from example.database import UsersModel, Database
-from fastapi_class_view.base import BaseService
+from fastapi_simple_class_view.base import BaseService
 
 
 class UserService(BaseService):

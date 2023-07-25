@@ -2,7 +2,7 @@ from typing import Callable
 
 from fastapi import APIRouter
 
-from fastapi_class_view.base import APIView
+from fastapi_simple_class_view.base import APIView
 
 
 class APIController(APIRouter):

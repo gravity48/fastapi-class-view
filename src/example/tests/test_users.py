@@ -6,7 +6,7 @@ from starlette.testclient import TestClient
 from example.app.service import UserService
 from example.database import UsersModel
 from example.main import app
-from fastapi_class_view.base import BaseService
+from fastapi_simple_class_view.base import BaseService
 
 
 @pytest.fixture
