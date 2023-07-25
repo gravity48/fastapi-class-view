@@ -1,0 +1,13 @@
+fastapi
+SQLAlchemy
+uvicorn
+httpx
+
+aiosqlite
+
+pytest
+pytest-asyncio
+black
+add-trailing-comma
+flake8
+isort
