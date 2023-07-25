@@ -6,7 +6,7 @@ controllers in FastAPI framework
 ## Install package
 
 ```shell
-pip install gspot-fastapi-auth
+pip install fastapi-simple-class-view
 ```
 
 ## Quickstart
