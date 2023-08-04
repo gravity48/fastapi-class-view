@@ -2,7 +2,7 @@ from pydantic.v1 import BaseSettings
 
 
 class DatabaseSettings(BaseSettings):
-    PATH: str = 'database.sqlite3'
+    PATH: str = 'test_alembic'
 
     class Config:
         env_prefix = 'DB_'

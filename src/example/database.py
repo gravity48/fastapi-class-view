@@ -1,8 +1,10 @@
+import os
 from asyncio import current_task
 from contextlib import asynccontextmanager
 
-from sqlalchemy import VARCHAR, Column, Integer
+from sqlalchemy import NullPool, text
 from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
     AsyncSession,
     async_scoped_session,
     async_sessionmaker,
@@ -24,19 +26,10 @@ class MetaSingleton(type):
         return cls._instances[cls]
 
 
-class UsersModel(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(VARCHAR(50))
-    first_name = Column(VARCHAR(100))
-    last_name = Column(VARCHAR(100))
-
-
 class Database(metaclass=MetaSingleton):
     def __init__(self):
         self._engine = create_async_engine(
-            f"sqlite+aiosqlite:///{database_settings.PATH}",
+            f"postgresql+asyncpg://django:django@localhost:5432/{database_settings.PATH}",
             echo=True,
         )
         self._session_factory = async_scoped_session(
@@ -44,16 +37,49 @@ class Database(metaclass=MetaSingleton):
             scopefunc=current_task,
         )
 
-    async def create_database(self) -> None:
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
+    @staticmethod
+    async def create_database(db_name) -> None:
+        engine = create_async_engine(
+            "postgresql+asyncpg://django:django@localhost:5432/postgres",
+            echo=True,
+        )
+        conn = await engine.connect()
+        try:
+            await conn.execute(text('COMMIT'))
+            await conn.execute(text(f'CREATE DATABASE {db_name}'))
+        finally:
+            await conn.close()
+
+    @staticmethod
+    async def drop_database(db_name) -> None:
+        engine = create_async_engine(
+            "postgresql+asyncpg://django:django@localhost:5432/postgres",
+            echo=True,
+        )
+        conn = await engine.connect()
+        try:
+            await conn.execute(text('COMMIT'))
+            await conn.execute(text(f'DROP DATABASE {db_name} WITH (FORCE)'))
+        finally:
+            await conn.close()
+
+    def setup_database(self, path):
+        self._engine = create_async_engine(
+            f"postgresql+asyncpg://django:django@localhost:5432/{path}",
+            echo=True,
+        )
+        self._session_factory = async_scoped_session(
+            async_sessionmaker(self._engine, class_=AsyncSession, expire_on_commit=False),
+            scopefunc=current_task,
+        )
 
     @asynccontextmanager
     async def session(self):
         session: AsyncSession = self._session_factory()
         try:
             yield session
+            if not os.getenv('DEBUG'):
+                await session.commit()
         except Exception:
             await session.rollback()
             raise

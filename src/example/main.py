@@ -1,7 +1,10 @@
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 
 from example.app.urls import app_router
+from example.database import Database
 
 app = FastAPI()
 

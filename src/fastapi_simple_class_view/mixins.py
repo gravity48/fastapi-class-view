@@ -9,7 +9,8 @@ from .type import PyModel, SlugField, UserModel
 
 class GenericView(AbstractGenericView):
     async def list(self, user: UserModel) -> List[PyModel]:
-        return await self.service.list()
+        res = await self.service.list()
+        return res
 
     async def retrieve(self, pk: SlugField, user: UserModel) -> PyModel:
         try:

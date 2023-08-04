@@ -20,7 +20,8 @@ class BaseService(AbstractService):
         async with self.session_factory() as session:
             query = select(self.model)
             result = await session.scalars(query)
-            return result.all()
+            result = result.all()
+            return result
 
     async def retrieve(self, pk: SlugField):
         async with self.session_factory() as session:
@@ -32,7 +33,7 @@ class BaseService(AbstractService):
         async with self.session_factory() as session:
             instance = self.model(**data)
             session.add(instance)
-            await session.commit()
+            await session.flush()
             return instance
 
     async def update(self, pk: SlugField, data: Dict):

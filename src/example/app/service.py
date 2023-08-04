@@ -1,4 +1,5 @@
-from example.database import Database, UsersModel
+from example.database import Database
+from example.model import UsersModel
 from fastapi_simple_class_view.base import BaseService
 
 
