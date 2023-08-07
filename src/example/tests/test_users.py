@@ -29,7 +29,9 @@ async def run_sql_migrations():
     config = Config(file_=config_file)
     config.set_main_option("script_location", migrations_dir)
     upgrade(config, "head")
+    print('create database')
     yield
+    print('drop_database')
     await Database().drop_database(f'{database_settings.PATH}_test')
 
 
@@ -43,15 +45,17 @@ async def client(run_sql_migrations):
 @pytest.mark.asyncio()
 async def test_01_list(client):
     response = client.get('/users/')
+    print('test_01_list')
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio()
-async def test_001_create(client):
+async def test_02_create(client):
     response = client.post(
         '/users/',
         json={"username": "string", "first_name": "string", "last_name": "string"},
     )
+    print('test_02_create')
     assert response.status_code == 201
 
 

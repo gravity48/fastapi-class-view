@@ -11,3 +11,10 @@ class UsersModel(Base):
     username = Column(VARCHAR(50))
     first_name = Column(VARCHAR(100))
     last_name = Column(VARCHAR(100))
+
+
+class UsersPermissions(Base):
+    __tablename__ = 'permissions'
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    code = Column(VARCHAR(50))
+    text = Column(VARCHAR(100))
