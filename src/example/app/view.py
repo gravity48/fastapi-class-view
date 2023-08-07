@@ -5,7 +5,7 @@ from fastapi_simple_class_view.mixins import GenericView
 from fastapi_simple_class_view.type import PyModel, UserModel
 
 from .permissions import is_customer, is_superuser
-from .scheme import PermissionsScheme, UserCreateUpdate, UserSchema
+from .scheme import DefaultScheme, PermissionsScheme, UserCreateUpdate, UserSchema
 from .service import permissions_service, user_service
 
 
@@ -27,7 +27,7 @@ class UsersView(GenericView, APIView):
     service = user_service
     slug_field_type = int
 
-    def custom_endpoint(self, user: UserModel, q: int) -> PyModel:
+    def custom_endpoint(self, user: UserModel, q: int) -> DefaultScheme:
         return {
             'id': 10,
             'username': 'custom_endpoint_username',

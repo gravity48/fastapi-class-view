@@ -10,14 +10,33 @@ from pydantic import BaseModel, create_model
 from .type import PyModel, SlugField, UserModel
 
 
-def change_annotation(annotation, return_type):
+def change_annotation(annotation, return_type=None, slug=None):
     if annotation is PyModel:
+        assert return_type is not None, 'no py_model attr'
         return return_type
+    elif annotation is SlugField:
+        assert slug is not None, 'no slug attr'
+        return slug
     elif isinstance(annotation, _GenericAlias):
         args = getattr(annotation, '__args__')
         origin = getattr(annotation, '__origin__')
-        new_args = tuple(map(lambda x: change_annotation(x, return_type), args))
+        new_args = tuple(map(lambda x: change_annotation(x, return_type, slug), args))
         return _GenericAlias(origin, new_args, inst=False, name=origin.__name__)
+    else:
+        return annotation
+
+
+def class_annotation(annotation, return_type=None, slug=None):
+    if issubclass(annotation, BaseModel):
+        fields = {}
+        for key, value in annotation.model_fields.items():
+            value.annotation = change_annotation(value.annotation, return_type, slug)
+            fields[key] = (value.annotation, value.default)
+        return create_model(
+            'ResponseModel',
+            **fields,
+            __base__=annotation,
+        )
     else:
         return annotation
 
@@ -64,51 +83,23 @@ class DynamicParamMeta(type):
         req_parameters: List[Parameter] = []
         def_parameters: List[Parameter] = []
         for name in sig.parameters:
-            if sig.parameters[name].annotation is PyModel:
-                assert return_type is not None, 'no py_model attr'
-                req_parameters.append(
-                    sig.parameters[name].replace(
-                        annotation=return_type,
-                    ),
-                )
-            elif sig.parameters[name].annotation is UserModel:
-                assert perm is not None, 'no permissions attr'
-                def_parameters.append(sig.parameters[name].replace(default=Depends(perm)))
-            elif sig.parameters[name].annotation is SlugField:
-                assert slug_field is not None, 'no slug field attr'
-                req_parameters.append(sig.parameters[name].replace(annotation=slug_field))
-            elif sig.parameters[name].default is Parameter.empty:
-                req_parameters.append(sig.parameters[name])
+            parameter = sig.parameters[name]
+            annotation = change_annotation(parameter.annotation, return_type, slug_field)
+            parameter = parameter.replace(annotation=annotation)
+            if parameter.annotation is UserModel:
+                parameter = parameter.replace(default=Depends(perm))
+            if parameter.default is Parameter.empty:
+                req_parameters.append(parameter)
             else:
-                def_parameters.append(sig.parameters[name])
+                def_parameters.append(parameter)
+
         parameters = req_parameters + def_parameters
         return_annotation = sig.return_annotation
+
         if inspect.isclass(return_annotation):
-            if issubclass(return_annotation, BaseModel):
-                fields = {}
-                for key, value in return_annotation.model_fields.items():
-                    if value.annotation is PyModel:
-                        value.annotation = return_type
-                    if isinstance(value.annotation, _GenericAlias):
-                        args = getattr(value.annotation, '__args__')
-                        origin = getattr(value.annotation, '__origin__')
-                        new_args = tuple(map(lambda x: return_type if x is PyModel else x, args))
-                        value.annotation = _GenericAlias(origin, new_args, inst=False, name='List')
-                    fields[key] = (value.annotation, value.default)
-                return_annotation = create_model(
-                    'ResponseModel',
-                    **fields,
-                    __base__=return_annotation,
-                )
+            return_annotation = class_annotation(return_annotation, return_type)
         else:
             return_annotation = change_annotation(return_annotation, return_type)
-            # if return_annotation is PyModel:
-            #     return_annotation = return_type
-            # elif isinstance(return_annotation, _GenericAlias):
-            #     args = getattr(return_annotation, '__args__')
-            #     origin = getattr(return_annotation, '__origin__')
-            #     new_args = tuple(map(lambda x: return_type if x is PyModel else x, args))
-            #     return_annotation = _GenericAlias(origin, new_args, inst=False, name='List')
 
         sig = sig.replace(parameters=parameters, return_annotation=return_annotation)
 
